@@ -1,0 +1,41 @@
+MACHINE ??= 'imx8mp-egf-3sm1009'
+DISTRO ?= 'fsl-imx-xwayland'
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+USER_CLASSES ?= "buildstats"
+PATCHRESOLVE = "noop"
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    HALT,${TMPDIR},100M,1K \
+    HALT,${DL_DIR},100M,1K \
+    HALT,${SSTATE_DIR},100M,1K \
+    HALT,/tmp,10M,1K"
+PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
+CONF_VERSION = "2"
+
+
+# Switch to Debian packaging and include package-management in the image
+PACKAGE_CLASSES = "package_deb"
+EXTRA_IMAGE_FEATURES += "package-management"
+
+# *** Common EGF Configurations ***********************************************
+YOCTO_BASE_PATH = "/home/yocto"
+DL_DIR = "/home/yocto/downloads"
+SSTATE_DIR = "/home/yocto/yocto-output/sstate-cache"
+TMPDIR = "/home/yocto/yocto-output/tmp"
+
+# ** Licences *************************************************************************
+COPY_LIC_MANIFEST = "1"
+COPY_LIC_DIRS = "1"
+LICENSE_CREATE_PACKAGE = "1"
+
+# *** Vulnerabilities check ****************************************************
+INHERIT += "cve-check"
+include conf/distro/include/cve-extra-exclusions.inc
+
+# *** Common Threads configuation ************************************************
+PARALLEL_MAKE="-j 4" 
+BB_NUMBER_THREADS="4"
+
