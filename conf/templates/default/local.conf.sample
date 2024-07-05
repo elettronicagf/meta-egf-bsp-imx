@@ -32,8 +32,8 @@ COPY_LIC_DIRS = "1"
 LICENSE_CREATE_PACKAGE = "1"
 
 # *** Vulnerabilities check ****************************************************
-INHERIT += "cve-check"
-include conf/distro/include/cve-extra-exclusions.inc
+#INHERIT += "cve-check"
+#include conf/distro/include/cve-extra-exclusions.inc
 
 # *** Common Threads configuation ************************************************
 PARALLEL_MAKE="-j 4" 
