@@ -25,6 +25,7 @@ YOCTO_BASE_PATH = "/home/yocto"
 DL_DIR = "/home/yocto/downloads"
 SSTATE_DIR = "/home/yocto/yocto-output/sstate-cache"
 TMPDIR = "/home/yocto/yocto-output/tmp"
+SDKIMAGE_FEATURES = "dev-pkgs"
 
 # ** Licences *************************************************************************
 COPY_LIC_MANIFEST = "1"
