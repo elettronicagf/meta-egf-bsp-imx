@@ -1,0 +1,9 @@
+[Unit]
+Description=EGF Initialization Service
+
+[Service]
+ExecStart=/usr/sbin/egf_init
+
+[Install]
+WantedBy=graphical.target
+

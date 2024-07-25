@@ -1,0 +1,41 @@
+#!/bin/sh
+exp_chip=$(find /sys | grep gpio | grep 1-0021 | grep uevent  | awk -F'/' '{print $10}')
+
+#detect board
+#3pb1001/890 with USB HUB and LTE MODULE
+if [ -n "${exp_chip}" ]; then
+
+    #enable HUB
+    gpioset -z -c gpiochip0 14=1
+    pkill -f gpioset
+    i2ctransfer -f -y 3 w3@0x2d 0xAA 0x55 0x00
+    sleep 1
+
+    #Keep Modem in RESET   
+    gpioset -z -c gpiochip2 25=1
+    pkill -f gpioset
+
+    #Keep Modem in Power Off  M2_B_LTE_FULL_CARD_POWER_OFF_B
+    gpioset -z -c $exp_chip 5=0
+    pkill -f gpioset
+
+    #Enable Power Supply 3.7V M2_B_LTE_SUPPLY_EN
+    gpioset -z -c $exp_chip 7=1
+    pkill -f gpioset
+
+    sleep 1
+    #Release RESET 
+    gpioset -z -c gpiochip2 25=0
+    pkill -f gpioset
+
+    sleep 1 
+    #Power On  M2_B_LTE_FULL_CARD_POWER_OFF_B
+    gpioset -z -c $exp_chip 5=1
+    pkill -f gpioset
+
+fi
+
+#generic startup script
+if [ -x "/root/egf_start" ]; then
+    /root/egf_start&
+fi
