@@ -37,5 +37,5 @@ fi
 
 #generic startup script
 if [ -x "/root/egf_start" ]; then
-    /root/egf_start&
+    /root/egf_start
 fi
