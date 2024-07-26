@@ -19,5 +19,5 @@ IMAGE_INSTALL:append = "libmodbus "
 #for html applications
 IMAGE_INSTALL:append = "chromium-ozone-wayland "
 
-
+IMAGE_INSTALL:append = "egf-init-service "
 
