@@ -21,3 +21,6 @@ IMAGE_INSTALL:append = "chromium-ozone-wayland "
 
 IMAGE_INSTALL:append = "egf-init-service "
 
+CORE_IMAGE_EXTRA_INSTALL:remove = "packagegroup-fsl-tools-testapps"
+CORE_IMAGE_EXTRA_INSTALL:remove = "packagegroup-fsl-tools-benchmark"
+CORE_IMAGE_EXTRA_INSTALL:remove = "packagegroup-fsl-tools-gpu"
