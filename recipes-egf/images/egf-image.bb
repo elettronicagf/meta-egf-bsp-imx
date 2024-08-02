@@ -19,7 +19,7 @@ IMAGE_INSTALL:append = "libmodbus "
 #for html applications
 IMAGE_INSTALL:append = "chromium-ozone-wayland "
 
-IMAGE_INSTALL:append = "egf-init-service "
+IMAGE_INSTALL:append = "egf-init-service serial-multistd-config "
 
 IMAGE_ROOTFS_SIZE = "4000000"
 
