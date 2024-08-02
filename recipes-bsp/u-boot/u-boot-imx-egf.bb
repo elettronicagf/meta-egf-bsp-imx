@@ -11,7 +11,7 @@ DEPENDS += "bison-native bc-native dtc-native gnutls-native"
 LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-UBOOT_SRC ?= "git://gitrepo.egf.it/imx53/u-boot;protocol=http"
+UBOOT_SRC ?= "git://bitbucket.org/egf-common/uboot-imx-egf.git;protocol=https"
 
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
 SRCREV = "c455f40228ef7180934c2393352f129c2f20a8ca"

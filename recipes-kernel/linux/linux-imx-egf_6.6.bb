@@ -17,9 +17,9 @@ DEPENDS += "lzop-native bc-native"
 DEFAULT_PREFERENCE = "1"
 
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
-KERNEL_SRC ?= "git://gitrepo.egf.it/imx53/kernel;protocol=http"
+KERNEL_SRC ?= "git://bitbucket.org/egf-common/linux-imx-egf.git;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "963b078c88cc3b205543cd3c16dafa6031f3de74"
+SRCREV = "71036be881735e40dd736fb9757824de9c488688"
 LINUX_VERSION = "6.6"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
