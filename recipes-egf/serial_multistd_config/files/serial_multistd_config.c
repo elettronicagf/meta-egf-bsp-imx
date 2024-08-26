@@ -3,7 +3,6 @@
 // derived from https://gist.github.com/amarburg/07564916d8d32e20e6ae375c1c83a995
 // Tool to setup multiserial IC on EGF SOM
 
-#include <gpiod.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -12,6 +11,11 @@
 #include <fcntl.h>
 #include <linux/serial.h>
 #include <sys/ioctl.h>
+
+
+#ifndef DEBUG_ON_PC
+#include <gpiod.h>
+
 #ifndef CONSUMER
 #define CONSUMER "Consumer"
 #endif
@@ -148,14 +152,6 @@ int set_output(const char *chip_path, int line_offset, int value)
 	return 0;
 }
 
-void print_usage()
-{
-#if WSM0880
-	printf("serial_multistd_config [off/rs232/rs485hd/rs485fd]\nuart /dev/ttymxc1 on connector CN15");
-#elif WSM0890
-	printf("serial_multistd_config [off/rs232/rs485hd/rs485fd]\nuart /dev/ttymxc0 on connector CN33");
-#endif
-}
 
 void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 {
@@ -178,33 +174,74 @@ void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 #error "undefined Board model"
 #endif
 }
+#else
+void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
+{
+}
+
+#endif
+
+void print_usage()
+{
+#if WSM0880
+	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc1 on connector CN15\n");
+#elif WSM0890
+	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc0 on connector CN33\n");
+#endif
+}
+
 
 int main(int argc, char **argv)
 {
 
-	argc--;
-	if (argc != 1)
+	char *par = "off";
+	int echo = 0;
+	int slew = 0;
+	int c;
+
+
+
+  while ((c = getopt(argc, argv, "m:e:s:")) != -1)
+  {
+	
+    switch (c)
+      {
+      case 'e':
+        echo = atoi(optarg);
+        break;
+      case 's':
+        slew = atoi(optarg);
+        break;
+	  case 'm':
+	    par = optarg;
+      default:
+        break;
+      }
+  }
+
+	if ((echo !=0 && echo!=1) || (slew !=0 && slew!=1) )
 	{
 		print_usage();
 		exit(-1);
 	}
-	char *par = argv[1];
+
+
 	if (!strcmp(par, "off"))
 	{
 		printf("Switching Off Transceiver\n");
-		set_io(0, 0, 0, 0, 0);
+		set_io(0, echo, 0, 0, slew);
 	}
 	else if (!strcmp(par, "rs232"))
 	{
-		set_io(1, 0, 1, 0, 0);
+		set_io(1, echo, 1, 0, slew);
 	}
 	else if (!strcmp(par, "rs485hd"))
 	{
-		set_io(1, 0, 1, 1, 0);
+		set_io(1, echo, 1, 1, slew);
 	}
 	else if (!strcmp(par, "rs485fd"))
 	{
-		set_io(1, 0, 0, 1, 0);
+		set_io(1, echo, 0, 1, slew);
 	}
 	else
 	{
