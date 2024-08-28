@@ -21,6 +21,14 @@ IMAGE_INSTALL:append = "chromium-ozone-wayland "
 
 IMAGE_INSTALL:append = "egf-init-service serial-multistd-config "
 
+IMAGE_INSTALL:remove = " connman"
+IMAGE_INSTALL:remove = " connman-client"
+IMAGE_INSTALL:remove = " connman-gnome"
+IMAGE_INSTALL:remove = " connman-plugin-wifi"
+IMAGE_INSTALL:remove = " connman-plugin-ethernet"
+IMAGE_INSTALL:remove = " connman-plugin-loopback"
+ 
+
 IMAGE_ROOTFS_SIZE = "4000000"
 
 CORE_IMAGE_EXTRA_INSTALL:remove = "packagegroup-fsl-tools-benchmark"
