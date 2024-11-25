@@ -18,6 +18,9 @@ IMAGE_PREPROCESS_COMMAND += "write_version;"
 IMAGE_INSTALL:append = "libmodbus "
 #for html applications
 IMAGE_INSTALL:append = "chromium-ozone-wayland "
+IMAGE_INSTALL:append = "iperf3 "
+IMAGE_INSTALL:append = "hdparm "
+IMAGE_INSTALL:append = "python3-pyserial "
 
 IMAGE_INSTALL:append = "egf-init-service serial-multistd-config "
 
