@@ -106,8 +106,8 @@ void enable_rs485(const char *port, int enable)
 	if (enable)
 	{
 
-		printf("RS485 mode will be SET\n");
-		rs485conf.flags |= SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND;
+		printf("RS485 mode will be SET with RTS_ON_SEND and RS485_RX_DURING_TX\n");
+		rs485conf.flags |= SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND | SER_RS485_RX_DURING_TX;
 	}
 	else
 	{

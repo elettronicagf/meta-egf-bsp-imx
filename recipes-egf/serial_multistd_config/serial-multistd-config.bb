@@ -1,6 +1,6 @@
 
 DESCRIPTION = " tool to setup SP330EEY multiserial IC on EGF Boards"
-
+PV = "1.1"
 DEPENDS = " libgpiod "
 SRC_URI = "file://serial_multistd_config.c"
 LICENSE = "GPL-2.0-or-later"
