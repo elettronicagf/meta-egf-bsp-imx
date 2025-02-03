@@ -1,0 +1,27 @@
+From f08e75dc0b96cbb727535ec66212dc145780420b Mon Sep 17 00:00:00 2001
+From: Andrea Collamati <andrea.collamati@elettronicagf.it>
+Date: Wed, 22 Jan 2025 16:50:32 +0100
+Subject: [PATCH 3/4] commented unused API
+
+---
+ libweston/renderer-g2d/g2d-renderer.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libweston/renderer-g2d/g2d-renderer.h b/libweston/renderer-g2d/g2d-renderer.h
+index 7c78b67a..46b19f9b 100644
+--- a/libweston/renderer-g2d/g2d-renderer.h
++++ b/libweston/renderer-g2d/g2d-renderer.h
+@@ -58,8 +58,8 @@ struct g2d_renderer_output_options {
+ };
+ 
+ struct g2d_renderer_interface {
+-	void (*clone) (struct weston_compositor *ec, int dmafd1, int dmafd2,int size);
+-	void (*blit) (struct weston_compositor *ec,struct g2d_surfaceEx* srcg2dSurface,struct g2d_surfaceEx* dstg2dSurface);
++	// void (*clone) (struct weston_compositor *ec, int dmafd1, int dmafd2,int size);
++	// void (*blit) (struct weston_compositor *ec,struct g2d_surfaceEx* srcg2dSurface,struct g2d_surfaceEx* dstg2dSurface);
+ 
+ 	void (*clone_set_buffer)(struct weston_output *output,struct g2d_surfaceEx *g2d_cloneimage,
+ 			int index,int clone_conn);
+-- 
+2.43.0
+

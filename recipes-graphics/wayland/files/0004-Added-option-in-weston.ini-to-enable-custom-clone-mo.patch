@@ -1,0 +1,350 @@
+From 1dc4efbcf50c4c441ca4cfb016c33edbb063b5ea Mon Sep 17 00:00:00 2001
+From: Andrea Collamati <andrea.collamati@elettronicagf.it>
+Date: Wed, 22 Jan 2025 16:54:50 +0100
+Subject: [PATCH 4/4] Added option in weston.ini to enable custom clone mode.
+ key custom_conf in cloneoutput section
+
+0 = As implemente by NXP (Destination fullscreen not rotated),
+1 = Destination 1024x600 Rotation (90) and center alignment
+2 = Destination 1024x600 Rotation (270) and center alignment
+
+Example: imx8mp-egf-3hi4005.dtb + HDMI 1920x1080
+
+[core]
+#gbm-format=argb8888
+use-g2d=true
+repaint-window=16
+idle-time=0
+xwayland=true
+#enable-overlay-view=1
+#shell=kiosk-shell.so
+clone-mode=1
+#DSI
+clone-connector-id=38
+
+[cloneoutput]
+#HDMI
+conn_id=40
+custom_conf=2
+mode=1920x1080@60
+
+
+[output]
+name=DSI-1
+#mode=1920x1080@60
+transform=rotate-270
+
+[output]
+name=HDMI-A-1
+mode=1920x1080@60
+#mode=off
+[cloneoutput]
+#HDMI
+conn_id=40
+custom_conf=2
+mode=1920x1080@60
+---
+ compositor/main.c                     | 11 ++-
+ include/libweston/backend-drm.h       |  5 ++
+ libweston/backend-drm/drm-gbm.c       |  6 +-
+ libweston/backend-drm/drm-internal.h  |  8 +++
+ libweston/renderer-g2d/g2d-renderer.c | 98 ++++++++++++++++++---------
+ libweston/renderer-g2d/g2d-renderer.h |  2 +-
+ 6 files changed, 95 insertions(+), 35 deletions(-)
+
+diff --git a/compositor/main.c b/compositor/main.c
+index 04a6e4b8..237d104f 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -2964,6 +2964,8 @@ static void load_cloneoutput(struct weston_config *wc, struct weston_drm_backend
+ 		int n;
+ 		uint32_t width = 0;
+ 		uint32_t height = 0;
++		uint32_t custom_conf = 0;
++
+ 
+ 		if(strcmp(section_name, "cloneoutput") != 0){
+ 			continue;
+@@ -2983,7 +2985,13 @@ static void load_cloneoutput(struct weston_config *wc, struct weston_drm_backend
+ 			config->cloneoutput[output_index].height = height;
+ 		}
+ 		free(s);	
+-		config->modecount = output_num;		
++
++		weston_config_section_get_uint(section, "custom_conf", &custom_conf, 0);
++		config->cloneoutput[output_index].custom_conf = custom_conf;
++
++		config->modecount = output_num;	
++		weston_log("custom_conf=%u\n",custom_conf);
++
+ 	}	
+ }
+ 
+@@ -3001,7 +3009,6 @@ load_drm_backend(struct weston_compositor *c, int *argc, char **argv,
+ 	bool use_g2d = false;
+ #endif
+ 	uint32_t enable_overlay_view;
+-
+ 	wet->drm_use_current_mode = false;
+ 
+ 	section = weston_config_get_section(wc, "core", NULL, NULL);
+diff --git a/include/libweston/backend-drm.h b/include/libweston/backend-drm.h
+index 9420b811..7378f65c 100644
+--- a/include/libweston/backend-drm.h
++++ b/include/libweston/backend-drm.h
+@@ -197,6 +197,11 @@ struct cloneoutput{
+ 	uint32_t width;
+ 	uint32_t height;
+ 	uint32_t conn_id;
++	int custom_conf;	/* 	0 = As implemente by NXP (Destination fullscreen not rotated),
++							1 = Destination 1024x600 Rotation (90) and center alignment
++							2 = Destination 1024x600 Rotation (270) and center alignment
++						*/
++
+ };
+ 
+ /** The backend configuration struct.
+diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
+index 9c115e43..0ddf449d 100644
+--- a/libweston/backend-drm/drm-gbm.c
++++ b/libweston/backend-drm/drm-gbm.c
+@@ -480,6 +480,7 @@ drm_output_init_g2d(struct drm_output *output, struct drm_backend *b)
+ 
+ 	if(b->clone_mode){
+ 		output->g2d_cloneimage = malloc((2*3)*sizeof(struct g2d_surfaceEx));
++		output->custom_conf = malloc(b->clone_conn * sizeof(uint32_t));
+ 	}
+ 	for (i = 0; i < ARRAY_LENGTH(output->dumb); i++) {
+ 		struct g2d_surfaceEx* g2dSurface = &(output->g2d_image[i]);
+@@ -544,6 +545,9 @@ drm_output_init_g2d(struct drm_output *output, struct drm_backend *b)
+ 				if (ret < 0)
+ 					goto err;
+ 				p->clonedumb->dmafd = clonedmafd;	
++
++				output->custom_conf[j] = b->cloneoutput[j].custom_conf;
++				weston_log("Custom Conf on CloneOutput[%d] set to %d;\n",j, output->custom_conf[j]);
+ 			}	
+ 		}			
+ 	}
+@@ -608,7 +612,7 @@ drm_output_render_g2d(struct drm_output_state *state, pixman_region32_t *damage)
+ 	b->g2d_renderer->output_set_buffer(&output->base,
+ 					  &output->g2d_image[output->current_image]);
+ 	if(b->clone_mode){
+-		b->g2d_renderer->clone_set_buffer(&output->base,output->g2d_cloneimage,
++		b->g2d_renderer->clone_set_buffer(&output->base,output->g2d_cloneimage, output->custom_conf,
+ 				output->current_image, b->clone_conn);
+ 	}
+ 	ec->renderer->repaint_output(&output->base, &total_damage, NULL);
+diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
+index 7a3341e2..245f745a 100644
+--- a/libweston/backend-drm/drm-internal.h
++++ b/libweston/backend-drm/drm-internal.h
+@@ -315,10 +315,17 @@ struct clone_info{
+ 	uint32_t height;
+ 
+ };
++/* ATTENTION THE STRUCTURE SHOULD BE REPLIED IN libweston/backend-drm.h
++   with the name struct cloneoutput*/
+ struct drmcloneoutput{
+ 	uint32_t width;
+ 	uint32_t height;
+ 	uint32_t conn_id;
++	int custom_conf;	/* 	0 = As implemente by NXP (Destination fullscreen not rotated),
++							1 = Destination 1024x600 Rotation (90) and center alignment
++							2 = Destination 1024x600 Rotation (270) and center alignment
++						*/
++
+ };
+ 
+ struct drm_device {
+@@ -745,6 +752,7 @@ struct drm_output {
+ #if defined(ENABLE_IMXG2D)
+ 	struct g2d_surfaceEx g2d_image[3];
+ 	struct g2d_surfaceEx *g2d_cloneimage;
++	uint32_t* custom_conf;
+ 	int dumb_dmafd[3];
+ #endif
+ 	int current_image;
+diff --git a/libweston/renderer-g2d/g2d-renderer.c b/libweston/renderer-g2d/g2d-renderer.c
+index 70b7ab46..10eb9670 100644
+--- a/libweston/renderer-g2d/g2d-renderer.c
++++ b/libweston/renderer-g2d/g2d-renderer.c
+@@ -119,6 +119,7 @@ struct g2d_output_state {
+ 	pixman_region32_t buffer_damage[BUFFER_DAMAGE_COUNT];
+ 	struct g2d_surfaceEx *drm_hw_buffer;
+ 	struct g2d_surfaceEx *clonebuffer;
++	uint32_t* custom_conf;
+ 	int clone_conn;
+ 	int dmage_empty;	
+ 	int width;
+@@ -193,7 +194,7 @@ get_renderer(struct weston_compositor *ec)
+ }
+ 
+  static void clone_mode_g2d_blit(struct weston_compositor *ec,struct g2d_surfaceEx* srcg2dSurface,struct g2d_surfaceEx* dstg2dSurface,
+- 			pixman_region32_t *output_damage)
++ 			pixman_region32_t *output_damage, uint32_t custom_conf)
+ {
+ 	struct g2d_renderer *gr = get_renderer(ec);
+ 
+@@ -204,34 +205,63 @@ get_renderer(struct weston_compositor *ec)
+ 	srcg2dSurface->base.width = srcg2dSurface->base.width;
+ 	srcg2dSurface->base.height = srcg2dSurface->base.height;
+ 	srcg2dSurface->base.blendfunc = G2D_ONE;
++	weston_log("clone_mode_g2d_blit=%d\n",custom_conf);
++	switch (custom_conf)
++	{
++	case 0: // original clone mode from NXP
++	{
++		if (dstg2dSurface->base.width < dstg2dSurface->base.height && srcg2dSurface->base.width > srcg2dSurface->base.height)
++		{
++			dstg2dSurface->base.rot = G2D_ROTATION_270;
++		}
++		else
++		{
++			dstg2dSurface->base.rot = G2D_ROTATION_0;
++		}
++		dstg2dSurface->base.blendfunc = G2D_ONE_MINUS_SRC_ALPHA;
++		dstg2dSurface->base.left = 0;
++		dstg2dSurface->base.right = dstg2dSurface->base.width;
++		dstg2dSurface->base.top = 0;
++		dstg2dSurface->base.bottom = dstg2dSurface->base.height;
++		g2d_set_clipping(gr->handle, 0, 0, dstg2dSurface->base.right, dstg2dSurface->base.height);
++		g2d_blitEx(gr->handle, srcg2dSurface, dstg2dSurface);
+ 
++		break;
++	}
++	case 1:
++	case 2:
++	{		
++		// Output su HDMI 1024x600 centered not scaled
++		const wClone = 600;
++		const hClone = 1024;
++		const int xOffset = (1920-wClone)/2;
++		const int yOffset = (1080-hClone)/2;
++
++		// Should be rotated because DSI is rotated
++		dstg2dSurface->base.rot = (custom_conf == 1 ? G2D_ROTATION_90 : G2D_ROTATION_270);
++		dstg2dSurface->base.blendfunc = G2D_ONE_MINUS_SRC_ALPHA;
++		dstg2dSurface->base.left =  xOffset;
++		dstg2dSurface->base.right = xOffset + wClone;
++		dstg2dSurface->base.top = yOffset;
++		dstg2dSurface->base.bottom =  yOffset + hClone;
++		g2d_set_clipping(gr->handle, 0, 0, dstg2dSurface->base.right, dstg2dSurface->base.height);
++		g2d_blitEx(gr->handle, srcg2dSurface, dstg2dSurface);
++#if 0
++		// need to clean left area. It remains dirty..
++		dstg2dSurface->base.left = 0;
++		dstg2dSurface->base.right = x_offset_dest - 1;
++		dstg2dSurface->base.top = 0;
++		dstg2dSurface->base.bottom = dstg2dSurface->base.height;
++		dstg2dSurface->base.width = dstg2dSurface->base.width;
++		dstg2dSurface->base.height = dstg2dSurface->base.height;
++		g2d_clear(gr->handle, &dstg2dSurface->base);
++		dstg2dSurface->base.clrcolor = 0xFF000000;
++#endif	
++	}
++	default:
++		break;
++	}
+ 
+-	if(dstg2dSurface->base.width < dstg2dSurface->base.height && srcg2dSurface->base.width>srcg2dSurface->base.height){
+-		dstg2dSurface->base.rot = G2D_ROTATION_270;
+-	}else{
+-		dstg2dSurface->base.rot = G2D_ROTATION_0;
+-	}
+-	dstg2dSurface->base.rot = G2D_ROTATION_90;
+-	dstg2dSurface->base.blendfunc = G2D_ONE_MINUS_SRC_ALPHA;
+-	dstg2dSurface->base.left = (1920-640)/2;
+-	dstg2dSurface->base.right = 640 + (1920-640)/2;
+-	dstg2dSurface->base.top = 0;
+-	dstg2dSurface->base.bottom = dstg2dSurface->base.height;
+-	dstg2dSurface->base.width = dstg2dSurface->base.width;
+-	dstg2dSurface->base.height = dstg2dSurface->base.height;
+-	dstg2dSurface->base.clrcolor = 0xFF000000;	
+-
+-	g2d_set_clipping(gr->handle,0,0,dstg2dSurface->base.right,dstg2dSurface->base.height);
+-	g2d_blitEx(gr->handle,srcg2dSurface,dstg2dSurface);
+-
+-	// need to clean left area. It remains dirty..
+-	dstg2dSurface->base.left = 0;
+-	dstg2dSurface->base.right =  (1920-640)/2;
+-	dstg2dSurface->base.top = 0;
+-	dstg2dSurface->base.bottom = dstg2dSurface->base.height;
+-	dstg2dSurface->base.width = dstg2dSurface->base.width;
+-	dstg2dSurface->base.height = dstg2dSurface->base.height;
+-	g2d_clear(gr->handle,&dstg2dSurface->base);
+ 	g2d_flush(gr->handle);
+ 	g2d_finish(gr->handle);
+ 	
+@@ -1251,7 +1281,7 @@ g2d_renderer_repaint_output(struct weston_output *output,
+ 	repaint_views(output, &total_damage);
+ 	for(int i = 0;i<go->clone_conn;i++){
+ 		if(!go->dmage_empty){
+-			clone_mode_g2d_blit(compositor,go->drm_hw_buffer,&go->clonebuffer[i],output_damage);
++			clone_mode_g2d_blit(compositor,go->drm_hw_buffer,&go->clonebuffer[i],output_damage,go->custom_conf[i]);
+ 		}
+ 	}
+ 	pixman_region32_fini(&total_damage);
+@@ -2046,6 +2076,10 @@ g2d_renderer_output_destroy(struct weston_output *output)
+ 		free(go->clonebuffer);
+ 		go->clonebuffer = NULL;
+ 	}
++	if(go->custom_conf){
++		free(go->custom_conf);
++		go->custom_conf = NULL;
++	}
+ 	for (i = 0; i < BUFFER_DAMAGE_COUNT; i++)
+ 	{
+ 		pixman_region32_fini(&go->buffer_damage[i]);
+@@ -2363,7 +2397,7 @@ g2d_renderer_output_set_buffer(struct weston_output *output, struct g2d_surfaceE
+ }
+ 
+ static void
+-g2d_renderer_cloneoutput_set_buffer(struct weston_output *output,struct g2d_surfaceEx *g2d_cloneimage,
++g2d_renderer_cloneoutput_set_buffer(struct weston_output *output,struct g2d_surfaceEx *g2d_cloneimage,uint32_t* custom_conf,
+ 			int index, int clone_conn)
+ {
+ 
+@@ -2372,6 +2406,7 @@ g2d_renderer_cloneoutput_set_buffer(struct weston_output *output,struct g2d_surf
+ 	for(i = 0; i < clone_conn;i++){
+ 		clone_idx = index + i*3;
+ 		go->clonebuffer[i] = g2d_cloneimage[clone_idx];
++		go->custom_conf[i] = custom_conf[i];
+ 	}
+ 	go->clone_conn = clone_conn;
+ }
+@@ -2398,6 +2433,7 @@ g2d_drm_renderer_output_create(struct weston_output *output,
+ 		pixman_region32_init(&go->buffer_damage[i]);
+ 	
+ 	go->clonebuffer = malloc(3*sizeof(go->clonebuffer[0]));
++	go->custom_conf = malloc(sizeof(uint32_t));
+ 
+ 	if (!g2d_renderer_resize_output(output, &options->fb_size, &options->area)) {
+ 		weston_log("Output %s failed to create 16F shadow.\n",
+@@ -2455,8 +2491,8 @@ drm_create_g2d_image(struct g2d_surfaceEx* g2dSurface,
+ }
+ 
+  WL_EXPORT struct g2d_renderer_interface g2d_renderer_interface = {
+-	.clone = clone_mode_g2d_clone,
+-	.blit = clone_mode_g2d_blit,
++	//.clone = clone_mode_g2d_clone,
++	//.blit = clone_mode_g2d_blit,
+ 	.clone_set_buffer = g2d_renderer_cloneoutput_set_buffer,	
+ 	.create = g2d_renderer_create,
+ 	.drm_display_create  = g2d_drm_display_create,
+diff --git a/libweston/renderer-g2d/g2d-renderer.h b/libweston/renderer-g2d/g2d-renderer.h
+index 46b19f9b..c060fc58 100644
+--- a/libweston/renderer-g2d/g2d-renderer.h
++++ b/libweston/renderer-g2d/g2d-renderer.h
+@@ -61,7 +61,7 @@ struct g2d_renderer_interface {
+ 	// void (*clone) (struct weston_compositor *ec, int dmafd1, int dmafd2,int size);
+ 	// void (*blit) (struct weston_compositor *ec,struct g2d_surfaceEx* srcg2dSurface,struct g2d_surfaceEx* dstg2dSurface);
+ 
+-	void (*clone_set_buffer)(struct weston_output *output,struct g2d_surfaceEx *g2d_cloneimage,
++	void (*clone_set_buffer)(struct weston_output *output,struct g2d_surfaceEx *g2d_cloneimage, uint32_t* custom_conf,
+ 			int index,int clone_conn);
+ 
+ 	int (*create)(struct weston_compositor *ec);
+-- 
+2.43.0
+
