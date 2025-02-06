@@ -21,6 +21,7 @@ IMAGE_INSTALL:append = "python3-pyserial "
 IMAGE_INSTALL:append = "python3-pip "
 IMAGE_INSTALL:append = "nano "
 IMAGE_INSTALL:append = "p7zip "
+IMAGE_INSTALL:append = "i2c-tools "
 IMAGE_INSTALL:append = "egf-init-service serial-multistd-config "
 
 IMAGE_INSTALL:remove = " connman"
