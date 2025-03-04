@@ -19,12 +19,13 @@ DEFAULT_PREFERENCE = "1"
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
 KERNEL_SRC ?= "git://bitbucket.org/egf-common/linux-imx-egf.git;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "2d317432fe65f0a70b3876294a98800f11f12500"
+SRCREV = "5ea4cc33cbc4e0e8d9124dff6ded0b6fa3c726e6"
 LINUX_VERSION = "6.6"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 KBUILD_DEFCONFIG:mx8-nxp-bsp = "imx_v8_egf_defconfig"
+KBUILD_DEFCONFIG:mx9-nxp-bsp = "imx_v8_egf_defconfig"
 
 pkg_postinst:kernel-devicetree:append () {
    rm -f $D/boot/devicetree-*
