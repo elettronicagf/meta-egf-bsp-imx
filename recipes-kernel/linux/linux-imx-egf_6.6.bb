@@ -19,7 +19,7 @@ DEFAULT_PREFERENCE = "1"
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
 KERNEL_SRC ?= "git://bitbucket.org/egf-common/linux-imx-egf.git;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "5ea4cc33cbc4e0e8d9124dff6ded0b6fa3c726e6"
+SRCREV = "585636339adf14164ebd72c644e65c8c1f4b9fa9"
 LINUX_VERSION = "6.6"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
