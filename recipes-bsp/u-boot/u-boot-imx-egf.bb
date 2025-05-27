@@ -16,6 +16,9 @@ UBOOT_SRC ?= "git://bitbucket.org/egf-common/uboot-imx-egf.git;protocol=https"
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
 SRCREV = "7cb309779eedbe7f23a069aa8f6e68c9ff6031e3"
 
+SRCBRANCH:imx93-egf-3sm1010 = "imx-6.6.23-2.0.0_egf_3sm1010-dev"
+SRCREV:imx93-egf-3sm1010 = "e5f457bfb8c3db5257b3d44b039e6e9bfbd82d2f"
+
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"

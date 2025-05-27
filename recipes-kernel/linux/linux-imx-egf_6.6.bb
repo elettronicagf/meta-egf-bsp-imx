@@ -33,4 +33,4 @@ pkg_postinst:kernel-devicetree:append () {
 
 
 KERNEL_VERSION_SANITY_SKIP="1"
-COMPATIBLE_MACHINE = "(mx6|mx7|mx8)"
+COMPATIBLE_MACHINE = "(mx6|mx7|mx8|mx93)"
