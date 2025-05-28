@@ -170,7 +170,14 @@ void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 	set_output(GPIO_EXPANDER_U77, 13, rs485_en);    // P1_5
 	set_output(GPIO_EXPANDER_U77, 12, half_duplex); // P1_4
 	enable_rs485("/dev/ttymxc0",rs485_en);
-#else
+#elif WSM0890_0820
+#define GPIO_EXPANDER_U42	"/dev/gpiochip8"
+	set_output(GPIO_EXPANDER_U42, 7, echo); 		// P0_7
+	set_output(GPIO_EXPANDER_U42, 15, slew);		// P1_7
+	set_output(GPIO_EXPANDER_U42, 14, n_shdn);		// P1_6
+	set_output(GPIO_EXPANDER_U42, 13, rs485_en);    // P1_5
+	set_output(GPIO_EXPANDER_U42, 12, half_duplex); // P1_4
+	enable_rs485("/dev/ttyLP0",rs485_en);#else
 #error "undefined Board model"
 #endif
 }

@@ -9,6 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-or-later;md5=fed5435554
 
 BOARDCONFIG:imx8mp-egf-3sm1009  = "-DWSM0890=1"
 BOARDCONFIG:imx8mm-egf-3sm1008m = "-DWSM0880=1"
+BOARDCONFIG:imx93-egf-3sm1010 = "-DWSM0890_0820=1"
 
 
 do_compile() {
