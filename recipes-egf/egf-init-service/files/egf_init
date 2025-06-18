@@ -1,10 +1,45 @@
 #!/bin/sh
-exp_chip=$(find /sys | grep gpio | grep 1-0021 | grep uevent  | awk -F'/' '{print $10}')
+
+eeprom_board=$(find /sys -name "eeprom" | grep 0054)
+tag_890=$(strings $eeprom_board | grep JFN0890)
+tag_mx8mp=$(strings $eeprom_board | grep mx8mp)
+tag_mx93=$(strings $eeprom_board | grep mx93)
+
+
+#mx93/820 on 890
+if [[ -n "${tag_890}" && -n "$tag_mx93" ]]; then
+    exp_chip=$(find /sys | grep gpio | grep 1-0021 | grep uevent  | awk -F'/' '{print $10}')
+    echo "Detected mx93 on 890"
+    i2ctransfer -f -y 7 w3@0x2d 0xAA 0x55 0x00
+    sleep 1
+    
+    #Keep Modem in RESET   
+    gpioset -z -c gpiochip1 27=1
+    pkill -f gpioset
+
+    #Keep Modem in Power Off  M2_B_LTE_FULL_CARD_POWER_OFF_B
+    gpioset -z -c $exp_chip 5=0
+    pkill -f gpioset
+
+    #Enable Power Supply 3.7V M2_B_LTE_SUPPLY_EN
+    gpioset -z -c $exp_chip 7=1
+    pkill -f gpioset
+
+    sleep 1
+    #Release RESET 
+    gpioset -z -c gpiochip1 27=0
+    pkill -f gpioset
+
+    sleep 1 
+    #Power On  M2_B_LTE_FULL_CARD_POWER_OFF_B
+    gpioset -z -c $exp_chip 5=1
+    pkill -f gpioset
 
 #detect board
-#3pb1001/890 with USB HUB and LTE MODULE
-if [ -n "${exp_chip}" ]; then
-
+#SOM 800 on 3pb1001/890 with USB HUB and LTE MODULE
+elif [ -n "$tag_mx8mp" ]; then
+    echo "Detected mx8mp"
+    exp_chip=$(find /sys | grep gpio | grep 1-0021 | grep uevent  | awk -F'/' '{print $10}')
     #enable HUB
     gpioset -z -c gpiochip0 14=1
     pkill -f gpioset
@@ -34,6 +69,7 @@ if [ -n "${exp_chip}" ]; then
     pkill -f gpioset
 
 fi
+
 
 #generic startup script
 if [ -x "/root/egf_start" ]; then
