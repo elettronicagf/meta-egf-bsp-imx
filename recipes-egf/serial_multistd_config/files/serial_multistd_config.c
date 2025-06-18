@@ -13,7 +13,6 @@
 #include <sys/ioctl.h>
 
 
-#ifndef DEBUG_ON_PC
 #include <gpiod.h>
 
 #ifndef CONSUMER
@@ -177,16 +176,11 @@ void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 	set_output(GPIO_EXPANDER_U42, 14, n_shdn);		// P1_6
 	set_output(GPIO_EXPANDER_U42, 13, rs485_en);    // P1_5
 	set_output(GPIO_EXPANDER_U42, 12, half_duplex); // P1_4
-	enable_rs485("/dev/ttyLP0",rs485_en);#else
-#error "undefined Board model"
-#endif
-}
+	enable_rs485("/dev/ttyLP0",rs485_en);
 #else
-void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
-{
-}
-
+	#error "undefined Board model"
 #endif
+}
 
 void print_usage()
 {
@@ -194,6 +188,8 @@ void print_usage()
 	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc1 on connector CN15\n");
 #elif WSM0890
 	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc0 on connector CN33\n");
+#elif WSM0890_0820
+	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttyLP0 on connector CN33\n");
 #endif
 }
 
