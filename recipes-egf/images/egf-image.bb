@@ -16,8 +16,9 @@ IMAGE_PREPROCESS_COMMAND += "write_version;"
 #package lists
 #EGF board supports RS485. libmodbus is useful.
 IMAGE_INSTALL:append = "libmodbus "
-#for html applications
-IMAGE_INSTALL:append = "chromium-ozone-wayland "
+#for html applications (only for mx8 cpu)
+IMAGE_INSTALL:append:mx8-generic-bsp = "chromium-ozone-wayland "
+
 IMAGE_INSTALL:append = "iperf3 "
 IMAGE_INSTALL:append = "hdparm "
 IMAGE_INSTALL:append = "python3-pyserial "
