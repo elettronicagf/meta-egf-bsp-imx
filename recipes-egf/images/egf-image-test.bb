@@ -4,7 +4,7 @@ require recipes-fsl/images/imx-image-multimedia.bb
 
 
 #versioning
-GF_YOCTO_ROOTFS_TEST_VERSION = "0.7.1"
+GF_YOCTO_ROOTFS_TEST_VERSION = "0.7.2"
 IMAGE_VERSION_SUFFIX = "-${GF_YOCTO_ROOTFS_TEST_VERSION}"
 IMAGE_BASENAME = "egf-image-test"
 write_version () {
