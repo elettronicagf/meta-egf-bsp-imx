@@ -19,6 +19,9 @@
 #
 # Add options for the script
 # Copyright (C) 2013 Freescale Semiconductor, Inc.
+#
+# Adapted to EGF needs
+# Copyright (C) 2025 Elettronica GF srl
 
 CWD=`pwd`
 PROGNAME="setup-environment"
@@ -145,7 +148,7 @@ OEROOT=$PWD/sources/poky
 if [ -e $PWD/sources/oe-core ]; then
     OEROOT=$PWD/sources/oe-core
 fi
-TEMPLATECONF=/home/yocto/yocto-input/sources/meta-egf-bsp-imx/conf/templates/default
+TEMPLATECONF=${TEMPLATECONF:-$PWD/sources/meta-egf-bsp-imx/conf/templates/default}
 
 . $OEROOT/oe-init-build-env $CWD/$1
 
@@ -166,6 +169,18 @@ if [ "$build_dir_setup_enabled" = "true" ]; then
         -e "s,DISTRO ?=.*,DISTRO ?= '$DISTRO',g" \
         -e "s,PACKAGE_CLASSES ?=.*,PACKAGE_CLASSES ?= '$PACKAGE_CLASSES',g" \
         -i conf/local.conf
+
+    for s in $HOME/.oe $HOME/.yocto; do
+        if [ -e $s/site.conf ]; then
+            echo "Linking $s/site.conf to conf/site.conf"
+            ln -s $s/site.conf conf
+        fi
+    done
+
+    if [ -e $HOME/.egfautoconf/auto.conf ]; then
+        echo "Linking $HOME/.egfautoconf/auto.conf to conf/auto.conf"
+        ln -s $HOME/.egfautoconf/auto.conf conf
+    fi
 
     generated_config=1
 fi
@@ -251,7 +266,7 @@ Your build environment has been configured with:
     MACHINE=$MACHINE
     SDKMACHINE=$SDKMACHINE
     DISTRO=$DISTRO
-    EULA=$EULA
+    EULA=$EULA_ACCEPTED
 EOF
 else
     echo "Your configuration files at $1 have not been touched."
