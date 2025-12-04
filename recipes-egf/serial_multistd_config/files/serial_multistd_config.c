@@ -152,7 +152,7 @@ int set_output(const char *chip_path, int line_offset, int value)
 }
 
 
-void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
+void set_io(int port, int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 {
 #if WSM0880
 	set_output("/dev/gpiochip4", 1, echo);
@@ -162,21 +162,47 @@ void set_io(int n_shdn, int echo, int half_duplex, int rs485_en, int slew)
 	set_output("/dev/gpiochip4", 26, half_duplex);
 	enable_rs485("/dev/ttymxc1",rs485_en);
 #elif WSM0890
-#define GPIO_EXPANDER_U77	"/dev/gpiochip7"
-	set_output(GPIO_EXPANDER_U77, 7, echo); 		// P0_7
-	set_output(GPIO_EXPANDER_U77, 15, slew);		// P1_7
-	set_output(GPIO_EXPANDER_U77, 14, n_shdn);		// P1_6
-	set_output(GPIO_EXPANDER_U77, 13, rs485_en);    // P1_5
-	set_output(GPIO_EXPANDER_U77, 12, half_duplex); // P1_4
-	enable_rs485("/dev/ttymxc0",rs485_en);
+#define GPIO_EXPANDER_U42	"/dev/gpiochip7"
+#define GPIO_EXPANDER_U46	"/dev/gpiochip5"
+	switch(port){
+		case 0: // CN18
+			set_output(GPIO_EXPANDER_U42, 7, echo); 		// P0_7
+			set_output(GPIO_EXPANDER_U42, 15, slew);		// P1_7
+			set_output(GPIO_EXPANDER_U42, 14, n_shdn);		// P1_6
+			set_output(GPIO_EXPANDER_U42, 13, rs485_en);    // P1_5
+			set_output(GPIO_EXPANDER_U42, 12, half_duplex); // P1_4
+			enable_rs485("/dev/ttymxc0",rs485_en);
+			break;
+		case 1: // CN20
+			set_output(GPIO_EXPANDER_U46, 12, echo); 		// P1_4
+			set_output(GPIO_EXPANDER_U46, 11, slew);		// P1_3
+			set_output(GPIO_EXPANDER_U46, 10, n_shdn);		// P1_2
+			set_output(GPIO_EXPANDER_U46,  9, rs485_en);    // P1_1
+			set_output(GPIO_EXPANDER_U46,  8, half_duplex); // P1_0
+			enable_rs485("/dev/ttymxc3",rs485_en);
+			break;
+	}
 #elif WSM0890_0820
 #define GPIO_EXPANDER_U42	"/dev/gpiochip8"
-	set_output(GPIO_EXPANDER_U42, 7, echo); 		// P0_7
-	set_output(GPIO_EXPANDER_U42, 15, slew);		// P1_7
-	set_output(GPIO_EXPANDER_U42, 14, n_shdn);		// P1_6
-	set_output(GPIO_EXPANDER_U42, 13, rs485_en);    // P1_5
-	set_output(GPIO_EXPANDER_U42, 12, half_duplex); // P1_4
-	enable_rs485("/dev/ttyLP0",rs485_en);
+#define GPIO_EXPANDER_U46	"/dev/gpiochip5" // NOT CHECKED YES 
+	switch(port){
+		case 0: // CN18
+			set_output(GPIO_EXPANDER_U42, 7, echo); 		// P0_7
+			set_output(GPIO_EXPANDER_U42, 15, slew);		// P1_7
+			set_output(GPIO_EXPANDER_U42, 14, n_shdn);		// P1_6
+			set_output(GPIO_EXPANDER_U42, 13, rs485_en);    // P1_5
+			set_output(GPIO_EXPANDER_U42, 12, half_duplex); // P1_4
+			enable_rs485("/dev/ttyLP0",rs485_en);
+			break;
+		case 1: // CN20
+			set_output(GPIO_EXPANDER_U46, 12, echo); 		// P1_4
+			set_output(GPIO_EXPANDER_U46, 11, slew);		// P1_3
+			set_output(GPIO_EXPANDER_U46, 10, n_shdn);		// P1_2
+			set_output(GPIO_EXPANDER_U46,  9, rs485_en);    // P1_1
+			set_output(GPIO_EXPANDER_U46,  8, half_duplex); // P1_0
+			enable_rs485("/dev/ttyLP4",rs485_en);
+			break;
+	}
 #else
 	#error "undefined Board model"
 #endif
@@ -187,24 +213,24 @@ void print_usage()
 #if WSM0880
 	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc1 on connector CN15\n");
 #elif WSM0890
-	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc0 on connector CN33\n");
+	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-p 0|1] [-e 0|1] [-s 0|1]\nuart /dev/ttymxc0 on connector CN33\n");
 #elif WSM0890_0820
-	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-e 0|1] [-s 0|1]\nuart /dev/ttyLP0 on connector CN33\n");
+	printf("serial_multistd_config [-m off/rs232/rs485hd/rs485fd] [-p 0|1] [-e 0|1] [-s 0|1]\nuart /dev/ttyLP0 on connector CN33\n");
 #endif
 }
 
 
 int main(int argc, char **argv)
 {
-
-	char *par = "off";
+	const char *par = "off";
+	int port = 0;
 	int echo = 0;
 	int slew = 0;
 	int c;
 
 
 
-  while ((c = getopt(argc, argv, "m:e:s:")) != -1)
+  while ((c = getopt(argc, argv, "m:e:s:p:")) != -1)
   {
 	
     switch (c)
@@ -214,6 +240,9 @@ int main(int argc, char **argv)
         break;
       case 's':
         slew = atoi(optarg);
+        break;
+      case 'p':
+        port = atoi(optarg);
         break;
 	  case 'm':
 	    par = optarg;
@@ -232,19 +261,19 @@ int main(int argc, char **argv)
 	if (!strcmp(par, "off"))
 	{
 		printf("Switching Off Transceiver\n");
-		set_io(0, echo, 0, 0, slew);
+		set_io(port, 0, echo, 0, 0, slew);
 	}
 	else if (!strcmp(par, "rs232"))
 	{
-		set_io(1, echo, 1, 0, slew);
+		set_io(port,1, echo, 1, 0, slew);
 	}
 	else if (!strcmp(par, "rs485hd"))
 	{
-		set_io(1, echo, 1, 1, slew);
+		set_io(port,1, echo, 1, 1, slew);
 	}
 	else if (!strcmp(par, "rs485fd"))
 	{
-		set_io(1, echo, 0, 1, slew);
+		set_io(port,1, echo, 0, 1, slew);
 	}
 	else
 	{
