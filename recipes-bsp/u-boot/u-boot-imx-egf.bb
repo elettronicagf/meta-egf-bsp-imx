@@ -16,6 +16,9 @@ UBOOT_SRC ?= "git://github.com/elettronicagf/uboot-imx-egf;protocol=https"
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
 SRCREV = "cf038488b0e0ff2da09f3526460819c68973f395"
 
+SRCBRANCH:imx8mp-egf-3sm2008 = "dev-3sm2008"
+SRCREV:imx8mp-egf-3sm2008 = "0be959f8b966dd488359d6534d55be10037b0ffb"
+
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
