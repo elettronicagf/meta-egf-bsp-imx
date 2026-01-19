@@ -21,7 +21,8 @@ IMAGE_INSTALL:append = "iperf3 "
 IMAGE_INSTALL:append = "hdparm "
 IMAGE_INSTALL:append = "python3-pyserial "
 
-IMAGE_INSTALL:append = "egf-init-service serial-multistd-config "
+IMAGE_INSTALL:append = "${@bb.utils.contains('MACHINE_FEATURES', 'multistd-serial', 'serial-multistd-config ', '' , d)}"
+IMAGE_INSTALL:append = "${@bb.utils.contains('MACHINE_FEATURES', 'egf-init-service', 'egf-init-service ', '' , d)}"
 
 IMAGE_INSTALL:remove = " connman"
 IMAGE_INSTALL:remove = " connman-client"
