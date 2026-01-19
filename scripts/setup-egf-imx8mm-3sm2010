@@ -1,0 +1,3 @@
+MACHINE=imx8mm-egf-3sm2010 DISTRO=fsl-imx-xwayland . setup-environment-egf bld-xwayland-imx8mm-egf-3sm2010
+
+
