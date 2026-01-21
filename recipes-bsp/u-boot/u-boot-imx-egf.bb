@@ -14,7 +14,7 @@ LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a
 UBOOT_SRC ?= "git://github.com/elettronicagf/uboot-imx-egf;protocol=https"
 
 SRCBRANCH = "imx-6.6.23-2.0.0_egf"
-SRCREV = "cf038488b0e0ff2da09f3526460819c68973f395"
+SRCREV = "aa7cb8d242ee2632385a0d4640346867f77aa23a"
 
 SRCBRANCH:imx8mp-egf-3sm2008 = "dev-3sm2008"
 SRCREV:imx8mp-egf-3sm2008 = "df9038d74d1cd579381f20dfba21a9a0de9802d3"
