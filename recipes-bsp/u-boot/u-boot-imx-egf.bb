@@ -20,7 +20,7 @@ SRCBRANCH:imx8mp-egf-3sm2008 = "dev-3sm2008"
 SRCREV:imx8mp-egf-3sm2008 = "df9038d74d1cd579381f20dfba21a9a0de9802d3"
 
 SRCBRANCH:imx8mm-egf-3sm2010 = "dev-3sm2010"
-SRCREV:imx8mm-egf-3sm2010 = "7d88688f02ded4458b4d992b0f2fcfdce4cd03c6"
+SRCREV:imx8mm-egf-3sm2010 = "7db5cd3d02dc3f4dec216058f7b6c2f51ff1c014"
 
 
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
