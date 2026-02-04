@@ -1,0 +1,1 @@
+PACKAGECONFIG:append:imx-nxp-bsp = " vpx"
