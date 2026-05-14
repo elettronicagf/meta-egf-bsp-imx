@@ -4,7 +4,7 @@ require dynamic-layers/qt6-layer/recipes-fsl/images/imx-image-full.bb
 
 
 #versioning
-GF_YOCTO_ROOTFS_VERSION = "0.7.4a"
+GF_YOCTO_ROOTFS_VERSION = "0.7.4b"
 IMAGE_VERSION_SUFFIX = "-${GF_YOCTO_ROOTFS_VERSION}"
 IMAGE_BASENAME = "egf-image"
 write_version () {
