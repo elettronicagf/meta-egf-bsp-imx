@@ -6,7 +6,7 @@ include falcon.inc
 
 
 #versioning
-GF_YOCTO_ROOTFS_VERSION = "0.7.4b"
+GF_YOCTO_ROOTFS_VERSION = "0.8"
 IMAGE_VERSION_SUFFIX = "-${GF_YOCTO_ROOTFS_VERSION}"
 IMAGE_BASENAME = "egf-image"
 write_version () {
