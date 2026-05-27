@@ -1,0 +1,40 @@
+diff --git a/board/egf/3sm2008/spl.c b/board/egf/3sm2008/spl.c
+index b7b21f0b490..e7b89a508d5 100644
+--- a/board/egf/3sm2008/spl.c
++++ b/board/egf/3sm2008/spl.c
+@@ -30,9 +30,23 @@
+ #include <asm/sections.h>
+ #include "../common/gf_eeprom.h"
+ #include "gf_mux.h"
++#include <serial.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
++#ifdef CONFIG_SPL_OS_BOOT
++int spl_start_uboot(void) {
++	if (IS_ENABLED(CONFIG_SPL_SERIAL) && serial_tstc() && serial_getc()) {
++	/* break into full u boot if any key is pressed */
++		while(serial_tstc()) { /* eat up all the remaining characters */
++			serial_getc();
++		}
++		return 1;
++	}
++	return 0; // start the Kernel
++}
++#endif
++
+ int spl_board_boot_device(enum boot_device boot_dev_spl)
+ {
+ #ifdef CONFIG_SPL_BOOTROM_SUPPORT
+diff --git a/include/configs/egf_3sm2008.h b/include/configs/egf_3sm2008.h
+index 9d34c54d66d..e5eb99b174b 100644
+--- a/include/configs/egf_3sm2008.h
++++ b/include/configs/egf_3sm2008.h
+@@ -125,6 +125,7 @@
+ 		"source\0" \
+ 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
+ 	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr_r} ${fdtfile}\0" \
++	"prepare_fdt=run loadfdt;ext2load mmc ${mmcdev}:2 ${loadaddr} /home/root/.falcon/uImage;run mmcargs;spl export fdt ${loadaddr} - ${fdt_addr_r};fatwrite mmc ${mmcdev}:${mmcpart} ${fdt_addr_r} " CONFIG_SPL_FS_LOAD_ARGS_NAME " ${fdtargslen}\0" \
+ 	"mmcboot=echo Booting from mmc ...; " \
+ 		"run mmcargs; " \
+ 		"if test ${boot_fit} = yes || test ${boot_fit} = try; then " \

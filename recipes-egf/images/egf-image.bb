@@ -1,5 +1,7 @@
 require dynamic-layers/qt6-layer/recipes-fsl/images/imx-image-full.bb
 
+### falcon mode (conditional usage inside .inc)
+include falcon.inc
 
 
 

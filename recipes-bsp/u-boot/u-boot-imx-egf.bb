@@ -54,6 +54,14 @@ do_deploy:append:mx8m-nxp-bsp () {
 
 }
 
+### falcon mode enablement ###
+SRC_URI:append:mx8m-generic-bsp = "${@bb.utils.contains('DISTRO_FEATURES', 'falconmode', ' \
+	file://0001-imx8m-reset-ethernet-phy-in-spl.patch \
+	file://0001-add-falcon-mode-support.patch \
+	file://0002-add-high-speed-pinctrls-in-spl.patch \
+	file://0003-Disable-vterm-blinking-cursor.patch \
+	file://falcon.cfg \
+	', '', d)}"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(mx8-nxp-bsp|mx9-nxp-bsp)"

@@ -1,5 +1,7 @@
 require recipes-core/images/core-image-base.bb
 
+### falcon mode (conditional usage inside .inc)
+include falcon.inc
 
 
 

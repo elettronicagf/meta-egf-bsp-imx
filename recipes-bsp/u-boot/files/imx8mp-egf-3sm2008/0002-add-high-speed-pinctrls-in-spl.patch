@@ -1,0 +1,18 @@
+diff --git a/arch/arm/dts/imx8mp-egf-3sm2008-u-boot.dtsi b/arch/arm/dts/imx8mp-egf-3sm2008-u-boot.dtsi
+--- a/arch/arm/dts/imx8mp-egf-3sm2008-u-boot.dtsi
++++ b/arch/arm/dts/imx8mp-egf-3sm2008-u-boot.dtsi
+@@ -97,6 +97,14 @@
+ &pinctrl_usdhc3 {
+ 	bootph-pre-ram;
+ };
++
++&pinctrl_usdhc3_100mhz {
++	bootph-pre-ram;
++};
++
++&pinctrl_usdhc3_200mhz {
++	bootph-pre-ram;
++};
+ 
+ &pinctrl_wdog {
+ 	bootph-pre-ram;

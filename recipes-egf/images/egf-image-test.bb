@@ -1,5 +1,7 @@
 require recipes-fsl/images/imx-image-multimedia.bb
 
+### falcon mode (conditional usage inside .inc)
+include falcon.inc
 
 
 

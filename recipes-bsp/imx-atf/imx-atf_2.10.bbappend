@@ -19,3 +19,7 @@ SRCREV:imx8mm-egf-3sm2010 = "db54f9bc3e5dcf5f09a4c9434169244211894586"
 SRC_URI:imx8mp-egf-3sm2008 = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH:imx8mp-egf-3sm2008 = "imx-6.6.23-2.0.0_egf"
 SRCREV:imx8mp-egf-3sm2008 = "db54f9bc3e5dcf5f09a4c9434169244211894586"
+
+### falcon mode enablement ###
+SRC_URI:append:mx8mm-generic-bsp = " file://0001-imx8mm-add-falcon-mode-support.patch "
+SRC_URI:append:mx8mp-generic-bsp = " file://0001-imx8mp-add-falcon-mode-support.patch "
