@@ -3,18 +3,12 @@ require dynamic-layers/qt6-layer/recipes-fsl/images/imx-image-full.bb
 ### falcon mode (conditional usage inside .inc)
 include falcon.inc
 
+### Initialize distro version from manifest tag
+inherit egf_distro_version
 
-
-#versioning
-GF_YOCTO_ROOTFS_VERSION = "0.8"
-IMAGE_VERSION_SUFFIX = "-${GF_YOCTO_ROOTFS_VERSION}"
-IMAGE_BASENAME = "egf-image"
-write_version () {
-	echo ${GF_YOCTO_ROOTFS_VERSION} > ${IMAGE_ROOTFS}/etc/version.gf
-}
-IMAGE_PREPROCESS_COMMAND += "write_version;"
-
-
+### Initialize buildinfo
+inherit image-buildinfo
+IMAGE_BUILDINFO_VARS += "IMAGE_BASENAME DATETIME EGF_DISTRO_VERSION"
 #package lists
 #EGF board supports RS485. libmodbus is useful.
 IMAGE_INSTALL:append = "libmodbus "
