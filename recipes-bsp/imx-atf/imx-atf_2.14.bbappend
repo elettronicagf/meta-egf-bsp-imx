@@ -1,12 +1,12 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:imx8mp-egf-3sm1009 = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:imx8mp-egf-3sm1009 = "imx-6.6.23-2.0.0_egf"
-SRCREV:imx8mp-egf-3sm1009 = "db54f9bc3e5dcf5f09a4c9434169244211894586"
+SRCBRANCH:imx8mp-egf-3sm1009 = "imx-6.18.37-2.1.0_egf"
+SRCREV:imx8mp-egf-3sm1009 = "7f31536d32b2a07becd25985a0571b8f51ce4144"
 
 SRC_URI:imx8mm-egf-3sm1008m = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:imx8mm-egf-3sm1008m = "imx-6.6.23-2.0.0_egf"
-SRCREV:imx8mm-egf-3sm1008m = "db54f9bc3e5dcf5f09a4c9434169244211894586"
+SRCBRANCH:imx8mm-egf-3sm1008m = "imx-6.18.37-2.1.0_egf"
+SRCREV:imx8mm-egf-3sm1008m = "7f31536d32b2a07becd25985a0571b8f51ce4144"
 
 SRC_URI:imx93-egf-3sm1010 = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH:imx93-egf-3sm1010 = "imx-6.6.23-2.0.0_egf"
@@ -21,5 +21,5 @@ SRCBRANCH:imx8mp-egf-3sm2008 = "imx-6.6.23-2.0.0_egf"
 SRCREV:imx8mp-egf-3sm2008 = "db54f9bc3e5dcf5f09a4c9434169244211894586"
 
 ### falcon mode enablement ###
-SRC_URI:append:mx8mm-generic-bsp = " file://0001-imx8mm-add-falcon-mode-support.patch "
-SRC_URI:append:mx8mp-generic-bsp = " file://0001-imx8mp-add-falcon-mode-support.patch "
+#SRC_URI:append:mx8mm-generic-bsp = " file://0001-imx8mm-add-falcon-mode-support.patch "
+#SRC_URI:append:mx8mp-generic-bsp = " file://0001-imx8mp-add-falcon-mode-support.patch "

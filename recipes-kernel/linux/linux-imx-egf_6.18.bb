@@ -7,8 +7,9 @@ DESCRIPTION = "Linux kernel provided and supported by EGF (based on the kernel p
 with focus on i.MX Family SOMs. It includes support for many IPs such as GPU, VPU and IPU."
 
 require recipes-kernel/linux/linux-imx.inc
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
+
 
 FILES:${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
@@ -16,11 +17,11 @@ DEPENDS += "lzop-native bc-native"
 
 DEFAULT_PREFERENCE = "1"
 
-SRCBRANCH = "imx-6.6.23-2.0.0_egf"
+SRCBRANCH = "imx-6.18.37-2.1.0_egf_dev"
 KERNEL_SRC ?= "git://github.com/elettronicagf/linux-imx-egf;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "b717b7dde6a167f6d97e4be362cc17511d04bc6f"
-LINUX_VERSION = "6.6"
+SRCREV = "6f7916ae86e7661b468d844c96bb096b76294d88"
+LINUX_VERSION = "6.18"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
@@ -31,6 +32,6 @@ pkg_postinst:kernel-devicetree:append () {
    rm -f $D/boot/devicetree-*
 }
 
-
-KERNEL_VERSION_SANITY_SKIP="1"
+INSANE_SKIP:${PN}-src += "buildpaths"
+KERNEL_VERSION_SANITY_SKIP = "1"
 COMPATIBLE_MACHINE = "(mx6|mx7|mx8|mx93)"
