@@ -25,13 +25,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 inherit systemd
 
 SYSTEMD_SERVICE:${PN} = "egf_init.service"
-
+S = "${UNPACKDIR}"
 
 do_install:append () {
 
     install -d ${D}${sbindir}/
-    install -m 0755 ${WORKDIR}/egf_init ${D}${sbindir}/egf_init
+    install -m 0755 ${S}/egf_init ${D}${sbindir}/egf_init
 
     install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/egf_init.service ${D}${systemd_unitdir}/system
+    install -m 0644 ${S}/egf_init.service ${D}${systemd_unitdir}/system
 }
