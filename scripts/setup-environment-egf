@@ -144,10 +144,7 @@ if [ ! -e $FSL_EULA_FILE ]; then
     return 1
 fi
 
-OEROOT=$PWD/sources/poky
-if [ -e $PWD/sources/oe-core ]; then
-    OEROOT=$PWD/sources/oe-core
-fi
+OEROOT=$PWD/sources/openembedded-core
 TEMPLATECONF=${TEMPLATECONF:-$PWD/sources/meta-egf-bsp-imx/conf/templates/default}
 
 . $OEROOT/oe-init-build-env $CWD/$1

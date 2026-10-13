@@ -1,6 +1,36 @@
 MACHINE ??= 'imx8mp-egf-3sm1009'
 DISTRO ?= 'fsl-imx-xwayland'
-EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+EGF_DISTRO_VERSION ?= 'EXPERIMENTAL'
+#
+# Extra image configuration defaults
+#
+# The EXTRA_IMAGE_FEATURES variable allows extra packages to be added to the generated
+# images. Some of these options are added to certain image types automatically. Some
+# of the features available are:
+#  "dbg-pkgs"             - add -dbg packages for all installed packages
+#                           (adds symbol information for debugging/profiling)
+#  "src-pkgs"             - add -src packages for all installed packages
+#                           (adds source code for debugging)
+#  "dev-pkgs"             - add -dev packages for all installed packages
+#                           (useful if you want to develop against libs in the image)
+#  "ptest-pkgs"           - add -ptest packages for all ptest-enabled packages
+#                           (useful if you want to run the package test suites)
+#  "tools-sdk"            - add development tools (gcc, make, pkgconfig etc.)
+#  "tools-debug"          - add debugging tools (gdb, strace)
+#  "eclipse-debug"        - add Eclipse remote debugging support
+#  "tools-profile"        - add profiling tools (oprofile, lttng, valgrind)
+#  "tools-testapps"       - add useful testing tools (ts_print, aplay, arecord etc.)
+#  "allow-empty-password" - allow users to have an empty password
+#  "empty-root-password"  - the root user has no password set
+#  "allow-root-login      - the root user can login
+# There are other features that can be used here too, see
+# meta/classes-recipe/image.bbclass and
+# meta/classes-recipe/core-image.bbclass for more details.
+#
+# The following will allow root login without a password for convenience.
+# Use with care, and never in product builds.
+EXTRA_IMAGE_FEATURES ?= "allow-empty-password empty-root-password allow-root-login"
+
 USER_CLASSES ?= "buildstats"
 PATCHRESOLVE = "noop"
 BB_DISKMON_DIRS ??= "\
@@ -14,7 +44,7 @@ BB_DISKMON_DIRS ??= "\
     HALT,/tmp,10M,1K"
 PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
 CONF_VERSION = "2"
-
+INHERIT += "rm_work"
 
 # Switch to Debian packaging and include package-management in the image
 PACKAGE_CLASSES = "package_deb"
@@ -24,6 +54,7 @@ EXTRA_IMAGE_FEATURES += "package-management"
 YOCTO_BASE_PATH = "/home/yocto"
 DL_DIR = "/home/yocto/downloads"
 SSTATE_DIR = "/home/yocto/yocto-output/sstate-cache"
+BB_HASHSERVE_DB_DIR = "${SSTATE_DIR}"
 TMPDIR = "/home/yocto/yocto-output/tmp"
 SDKIMAGE_FEATURES = "dev-pkgs"
 
@@ -37,6 +68,6 @@ LICENSE_CREATE_PACKAGE = "1"
 #include conf/distro/include/cve-extra-exclusions.inc
 
 # *** Common Threads configuation ************************************************
-PARALLEL_MAKE="-j 4" 
-BB_NUMBER_THREADS="4"
+PARALLEL_MAKE = "-j 4" 
+BB_NUMBER_THREADS = "4"
 
