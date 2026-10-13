@@ -2,49 +2,66 @@
 # Copyright 2017-2024 NXP
 # Copyright 2024 Elettronica GF s.r.l con Socio Unico
 
-SUMMARY = "U-Boot for eGF Boards"
 require recipes-bsp/u-boot/u-boot.inc
+require u-boot-imx-common-egf.inc
 
-PROVIDES += "u-boot"
-DEPENDS += "bison-native bc-native dtc-native gnutls-native"
+PROVIDES += "u-boot u-boot-mfgtool"
 
-LICENSE = "GPL-2.0-or-later"
-LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
+inherit uuu_bootloader_tag
 
-UBOOT_SRC ?= "git://github.com/elettronicagf/uboot-imx-egf;protocol=https"
+# The UUU tag goes on the boot partition. For 8+, the boot partition image
+# is imx-boot, so disable UUU-tagging here
+UUU_BOOTLOADER:mx8-generic-bsp = ""
+UUU_BOOTLOADER:mx9-generic-bsp = ""
 
-SRCBRANCH = "imx-6.6.23-2.0.0_egf"
-SRCREV = "aa7cb8d242ee2632385a0d4640346867f77aa23a"
+TOOLCHAIN_OPTIONS:append = " -Wno-error=implicit-function-declaration"
 
-SRCBRANCH:imx8mp-egf-3sm2008 = "dev-3sm2008"
-SRCREV:imx8mp-egf-3sm2008 = "df9038d74d1cd579381f20dfba21a9a0de9802d3"
-
-SRCBRANCH:imx8mm-egf-3sm2010 = "dev-3sm2010"
-SRCREV:imx8mm-egf-3sm2010 = "4682edb0619798d61db0a976b31cea25ca6c3f10"
-
-
-SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH}"
-
-S = "${WORKDIR}/git"
-
-BOOT_TOOLS = "imx-boot-tools"
-
-do_deploy:append:mx8m-nxp-bsp () {
-    # Deploy the mkimage, u-boot-nodtb.bin and the U-Boot dtb for mkimage to generate boot binary
+do_deploy:append:mx8m-generic-bsp() {
+    # Deploy u-boot-nodtb.bin and fsl-imx8m*-XX.dtb for mkimage to generate boot binary
     if [ -n "${UBOOT_CONFIG}" ]
     then
         for config in ${UBOOT_MACHINE}; do
             i=$(expr $i + 1);
             for type in ${UBOOT_CONFIG}; do
+                builddir="${config}-${type}"
                 j=$(expr $j + 1);
                 if [ $j -eq $i ]
                 then
+                    builddir="${config}-${type}"
                     install -d ${DEPLOYDIR}/${BOOT_TOOLS}
-                    install -m 0777 ${B}/${config}/arch/arm/dts/${UBOOT_DTB_NAME}  ${DEPLOYDIR}/${BOOT_TOOLS}
-                    for dtb in ${UBOOT_DTB_EXTRA}; do
-                        install -m 0777 ${B}/${config}/arch/arm/dts/${dtb} ${DEPLOYDIR}/${BOOT_TOOLS}
+                    install -m 0644 ${B}/${builddir}/u-boot-nodtb.bin ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${type}
+                    UBOOT_DTB_NAME_FLAGS="${type}:${UBOOT_DTB_NAME}"
+                    for key_value in ${UBOOT_DTB_NAME_FLAGS}; do
+                        local type_key="${key_value%%:*}"
+                        local dtb_name="${key_value#*:}"
+                        local dtb_path=""
+                        if [ "$type_key" = "$type" ]
+                        then
+                            bbnote "UBOOT_CONFIG = $type, UBOOT_DTB_NAME = $dtb_name"
+                            # There is only one ${dtb_name}, the first one. All the other are with the type appended
+                            if [ ! -f "${DEPLOYDIR}/${BOOT_TOOLS}/${dtb_name}" ]; then
+                                if [ -f "${B}/${builddir}/arch/arm/dts/${dtb_name}" ]; then
+                                    dtb_path="arch/arm/dts"
+                                elif [ -f "${B}/${builddir}/dts/upstream/src/arm64/freescale/${dtb_name}" ]; then
+                                    dtb_path="dts/upstream/src/arm64/freescale"
+                                else
+                                    bbfatal "DTB '${dtb_name}' not found in expected locations"
+                                fi
+                                bbnote "DTB found at ${B}/${builddir}/${dtb_path}/${dtb_name}"
+                                install -m 0644 ${B}/${builddir}/${dtb_path}/${dtb_name} ${DEPLOYDIR}/${BOOT_TOOLS}/${dtb_name}
+                            else
+                                bbwarn "Use custom wks.in for $dtb_name = $type"
+                            fi
+                            if [ -f "${B}/${builddir}/${dtb_path}/${dtb_name}" ]; then
+                                install -m 0644 ${B}/${builddir}/${dtb_path}/${dtb_name} ${DEPLOYDIR}/${BOOT_TOOLS}/${dtb_name}-${type}
+                            fi
+                        fi
+                        unset type_key
+                        unset dtb_name
+                        unset dtb_path
                     done
-                    install -m 0777 ${B}/${config}/u-boot-nodtb.bin  ${DEPLOYDIR}/${BOOT_TOOLS}/u-boot-nodtb.bin-${MACHINE}-${UBOOT_CONFIG}
+
+                    unset UBOOT_DTB_NAME_FLAGS
                 fi
             done
             unset  j
@@ -52,8 +69,19 @@ do_deploy:append:mx8m-nxp-bsp () {
         unset  i
     fi
 
+    # Deploy CRT.* from u-boot for stmm
+    install -m 0644 ${S}/CRT.*     ${DEPLOYDIR}
 }
 
+do_deploy:append:mx93-generic-bsp() {
+    # Deploy CRT.* from u-boot for stmm
+    install -m 0644 ${S}/CRT.*     ${DEPLOYDIR}
+}
+
+do_deploy:append:mx95-generic-bsp() {
+    # Deploy CRT.* from u-boot for stmm
+    install -m 0644 ${S}/CRT.*     ${DEPLOYDIR}
+}
 ### falcon mode enablement ###
 SRC_URI:append:mx8m-generic-bsp = "${@bb.utils.contains('DISTRO_FEATURES', 'falconmode', ' \
 	file://0001-imx8m-reset-ethernet-phy-in-spl.patch \
