@@ -6,6 +6,102 @@ tag_mx8mp=$(strings $eeprom_board | grep mx8mp)
 tag_mx93=$(strings $eeprom_board | grep mx93)
 
 
+
+# PHYs Realtek Led configuration helper functions
+
+BASE="/sys/class/leds"
+
+write_attr()
+{
+    value="$1"
+    file="$2"
+
+    if [ ! -e "$file" ]; then
+        echo "Attribute not found: $file" >&2
+        return 1
+    fi
+
+    current="$(cat "$file" 2>/dev/null)"
+
+    if [ "$current" = "$value" ]; then
+        return 0
+    fi
+
+    if ! printf '%s\n' "$value" > "$file"; then
+        echo "Cannot write '$value' to $file" >&2
+        return 1
+    fi
+}
+
+reset_trigger()
+{
+    led="$1"
+
+    printf '%s\n' none > "$led/trigger" || return 1
+    printf '%s\n' netdev > "$led/trigger" || return 1
+}
+
+wait_for_leds()
+{
+    led0="$1"
+    led1="$2"
+    led2="$3"
+    count=0
+
+    while [ ! -d "$led0" ] || [ ! -d "$led1" ] || [ ! -d "$led2" ]; do
+        count=$((count + 1))
+
+        if [ "$count" -ge 50 ]; then
+            return 1
+        fi
+
+        sleep 0.1
+    done
+}
+
+configure_phy_leds()
+{
+    prefix="$1"
+
+    led0="$BASE/$prefix:green:lan-0"
+    led1="$BASE/$prefix:green:lan-1"
+    led2="$BASE/$prefix:amber:lan-2"
+
+    echo "Configuring PHY LEDs: $prefix"
+
+    if ! wait_for_leds "$led0" "$led1" "$led2"; then
+        echo "PHY LEDs not found for $prefix" >&2
+        return 1
+    fi
+
+    #
+    # LED0: attività TX/RX
+    #
+    reset_trigger "$led0" || return 1
+
+    # RX e TX devono essere abilitati insieme.
+    write_attr 1 "$led0/rx" || true
+    write_attr 1 "$led0/tx" || true
+
+    #
+    # LED1: link 1000 Mbit/s
+    #
+    reset_trigger "$led1" || return 1
+    write_attr 1 "$led1/link_1000" || true
+
+    #
+    # LED2: link 10/100 Mbit/s
+    #
+    reset_trigger "$led2" || return 1
+    write_attr 1 "$led2/link_10" || true
+    write_attr 1 "$led2/link_100" || true
+
+    echo "Configured PHY LEDs: $prefix"
+}
+
+
+
+
 #mx93/820 on 890
 if [[ -n "${tag_890}" && -n "$tag_mx93" ]]; then
     exp_chip=$(find /sys | grep gpio | grep 1-0021 | grep uevent  | awk -F'/' '{print $10}')
@@ -68,7 +164,16 @@ elif [ -n "$tag_mx8mp" ]; then
     gpioset -z -c $exp_chip 5=1
     pkill -f gpioset
 
+    configure_phy_leds "30be0000.ethernet-1:02" || status=1
+    configure_phy_leds "stmmac-1:01" || status=1
+
 fi
+
+
+
+
+
+
 
 
 #generic startup script
