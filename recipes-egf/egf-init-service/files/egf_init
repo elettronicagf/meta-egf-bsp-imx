@@ -2,6 +2,7 @@
 
 eeprom_board=$(find /sys -name "eeprom" | grep 0054)
 tag_890=$(strings $eeprom_board | grep JFN0890)
+tag_880=$(strings $eeprom_board | grep JFN0880)
 tag_mx8mp=$(strings $eeprom_board | grep mx8mp)
 tag_mx93=$(strings $eeprom_board | grep mx93)
 
@@ -167,6 +168,10 @@ elif [ -n "$tag_mx8mp" ]; then
     configure_phy_leds "30be0000.ethernet-1:02" || status=1
     configure_phy_leds "stmmac-1:01" || status=1
 
+#detect board
+#SOM 670 on 3pb1002/880
+elif [ -n "$tag_880" ]; then
+    configure_phy_leds "30be0000.ethernet-1:04" || status=1
 fi
 
 
