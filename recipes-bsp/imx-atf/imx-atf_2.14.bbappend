@@ -9,8 +9,8 @@ SRCBRANCH:imx8mm-egf-3sm1008m = "imx-6.18.37-2.1.0_egf"
 SRCREV:imx8mm-egf-3sm1008m = "28a9bb3d16fa099fd906ee5f23faf104e7075b70"
 
 SRC_URI:imx93-egf-3sm1010 = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
-SRCBRANCH:imx93-egf-3sm1010 = "imx-6.6.23-2.0.0_egf"
-SRCREV:imx93-egf-3sm1010 = "db54f9bc3e5dcf5f09a4c9434169244211894586"
+SRCBRANCH:imx93-egf-3sm1010 = "imx-6.18.37-2.1.0_egf"
+SRCREV:imx93-egf-3sm1010 = "28a9bb3d16fa099fd906ee5f23faf104e7075b70"
 
 SRC_URI:imx8mm-egf-3sm2010 = "git://github.com/elettronicagf/imx-atf-egf;protocol=https;branch=${SRCBRANCH}"
 SRCBRANCH:imx8mm-egf-3sm2010 = "imx-6.6.23-2.0.0_egf"
