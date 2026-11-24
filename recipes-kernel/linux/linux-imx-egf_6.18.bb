@@ -20,10 +20,8 @@ DEFAULT_PREFERENCE = "1"
 SRCBRANCH = "imx-6.18.37-2.1.0_egf_dev"
 KERNEL_SRC ?= "git://github.com/elettronicagf/linux-imx-egf;protocol=https"
 SRC_URI = "${KERNEL_SRC};branch=${SRCBRANCH}"
-SRCREV = "d958bfa757358ddcd4a5e8dbc53dee1f85114d8b"
+SRCREV = "808e6efbebeee7834eac327aaa731c04fcfa38be"
 LINUX_VERSION = "6.18"
-
-FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 KBUILD_DEFCONFIG:mx8-nxp-bsp = "imx_v8_egf_defconfig"
 KBUILD_DEFCONFIG:mx9-nxp-bsp = "imx_v8_egf_defconfig"
